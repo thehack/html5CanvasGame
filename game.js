@@ -1,5 +1,3 @@
-// a test of canvas.
-
 // Plane oject. There is only one of these, so no need for psuedo-class.
 var plane = {x: 180, y: 100, speed: 4, img: new Image()};
 plane.img.src = 'bird.png';
