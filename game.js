@@ -2,7 +2,7 @@
 var plane = {x: 180, y: 100, speed: 4, img: new Image()};
 plane.img.src = 'bird.png';
 
-// 
+// Classes for Game Objects.
 var Building = Class.extend({
   init: function(){
     this.x = 400;
