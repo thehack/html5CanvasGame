@@ -1,5 +1,5 @@
 // Plane oject. There is only one of these, so no need for psuedo-class.
-var plane = {x: 180, y: 100, speed: 4, img: new Image()};
+var plane = {x: 180, y: 100, speed: 5, xDirection: 0, yDirection: 0, img: new Image()};
 plane.img.src = 'bird.png';
 
 // Classes for Game Objects.
@@ -35,7 +35,7 @@ var Explosion = Class.extend({
 
 // Constants
 var SPEED = 3; // rate at which plane normally moves past buildings.
-var FPS = 30;
+var FPS = 33;
 
 var timeSinceLastBuilding = 0;
 var buildings = [];
@@ -55,26 +55,40 @@ var setup = function() {
 	ctx.fillStyle = '#7CE8E8';
 	plane.img.onLoad = animate();
 
-	// WASD Controls
-	// I will change this so that once the keydown is fired, movement continues until keyup.
+	// ARROW KEYS for controls; 
 	body.onkeydown = function(event) {
-		kk = event.keyCode;
+		var kk = event.keyCode;
 
 		if (kk == 38) { // 'A' is pressed
-			plane.y -= plane.speed;
+			plane.yDirection = plane.speed*-1;
 		};
 		if (kk == 40) { // 'S'
-			plane.y += plane.speed;
+			plane.yDirection = plane.speed;
 		};
 		if (kk == 37) { //'W' is pressed
-			plane.x -= plane.speed;
+			plane.xDirection = plane.speed*-1;
 		};
 		if (kk == 39) { // 'D' is pressed
-			plane.x += plane.speed;
+			plane.xDirection = plane.speed;
 		};
 		if (kk == 32) { // 'SPACEBAR' is pressed
 			missles.push(new Missle());
 		};
+	};
+	body.onkeyup = function(event) {
+		var ku = event.keyCode;
+		if (ku == 38) { // 'A' is pressed
+			plane.yDirection += plane.speed;
+		}
+		if (ku == 40) { // 'S'
+			plane.yDirection -= plane.speed;
+		}
+		if (ku == 37) { //'W' is pressed
+			plane.xDirection += plane.speed;
+		}
+		if (ku == 39) { // 'D' is pressed
+			plane.xDirection -= plane.speed;
+		}
 	};
 };
 
@@ -86,6 +100,8 @@ var explode = function(building, missle) {
 	explosion.x = building.x;
 
 };
+
+// Everything on the canvas gets redrawn at the framerate (FPS)
 var draw = function() {
 	ctx.clearRect(0,0,400,200);
 	ctx.fillStyle = '#87F3FF';
@@ -106,18 +122,17 @@ var draw = function() {
 		3. the back of the bird is further right than the back of the building 
 		*/
 		if ((plane.x + plane.img.width > building.x) && (plane.y + plane.img.height > building.y) && (building.x + building.width > plane.x)) {
-			console.log('crash');
-		};
+		}
 		// get rid of invisible buildings
 		if (building.x < building.width*(-1)) {
 			buildings.shift();
-		};		
+		}
 	};
+
 	// draw plane
-	ctx.drawImage(plane.img, plane.x ,plane.y);
+	ctx.drawImage(plane.img, (plane.x += plane.xDirection), (plane.y += plane.yDirection));
 
 	// draw missles
-
 	for (var i = 0; i < missles.length; i++) {
 		var missle = missles[i];
 		if(missle.stopped === false) {
@@ -132,12 +147,13 @@ var draw = function() {
 			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.img.height > building.y) && (building.x + building.width > plane.x)) {
 				var index = missles.indexOf(missle);
 				destroy(missle, missles);
-				console.log('hit');
 				explode(building, missle);
 			}
 
 		};
 	};
+
+	// draw explosions
 	for (var i = explosions.length - 1; i >= 0; i--) {
 		explosion = explosions[i];
 		explosion.x -= SPEED;
