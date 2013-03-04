@@ -1,25 +1,39 @@
 // Plane oject. There is only one of these, so no need for psuedo-class.
-var plane = {x: 180, y: 100, speed: 5, xDirection: 0, yDirection: 0, img: new Image()};
-plane.img.src = 'bird.png';
+var plane = {
+	x: 300,
+	y: 300,
+	speed: 5, 
+	xDirection: 0, 
+	yDirection: 0, 
+//	img: new Image(), 
+	width: 40, 
+	height: 20, 
+	color: '#1ed700'
+};
+// plane.img.src = 'bird.png';
 
 // Classes for Game Objects.
 var Building = Class.extend({
   init: function(){
-    this.x = 400;
-    this.height = roundTo(randomNumber(80, 180), 10);
-    this.width = roundTo(randomNumber(60, 100), 10);
-    this.y = 200 - this.height;
-    this.color = 'grey';
+    this.x = STAGE_WIDTH;
+    this.height = roundTo(randomNumber(10, 160), 10);
+    this.width = this.height;
+    this.y = roundTo(randomNumber(0, (STAGE_HEIGHT - this.height)), 10);
+    this.hits = 0;
+    this.color = boxColors[randomNumber(0,3)];
   }
+
 });
 
 var Missle = Class.extend({
 	init: function() {
-		this.x = plane.x;
-		this.y = plane.y + 20;
+		this.x = plane.x + 20;
+		this.y = plane.y + 10;
 		this.stopped = false;
 		this.img = new Image();
 		this.img.src = 'missle.png';
+		this.height = 10;
+		this.width = 10;
 	}
 });
 
@@ -36,7 +50,10 @@ var Explosion = Class.extend({
 // Constants
 var SPEED = 3; // rate at which plane normally moves past buildings.
 var FPS = 33;
-
+var BACKGROUND_COLOR = '#220035';
+var STAGE_HEIGHT = 600;
+var STAGE_WIDTH = 600;
+var boxColors = ['rgb(215, 0, 127)', '#0096f9', '#f9d200', '#ff0000'];
 var timeSinceLastBuilding = 0;
 var buildings = [];
 var missles = [];
@@ -49,11 +66,11 @@ var setup = function() {
 	body.appendChild(div);
 	div.appendChild(canvas);
 	canvas.id = 'canvas';
-	canvas.width = 400;
-	canvas.height = 200;
+	canvas.width = STAGE_WIDTH;
+	canvas.height = STAGE_HEIGHT;
 	ctx = canvas.getContext('2d');
 	ctx.fillStyle = '#7CE8E8';
-	plane.img.onLoad = animate();
+	body.onLoad = animate();
 
 	// ARROW KEYS for controls; 
 	body.onkeydown = function(event) {
@@ -98,14 +115,18 @@ var explode = function(building, missle) {
 	explosions.push(explosion);
 	explosion.y = missle.y;
 	explosion.x = building.x;
+	building.hits += 1;
+	if(building.hits == 5) {
+		destroy(building, buildings);
+	}
 
 };
 
 // Everything on the canvas gets redrawn at the framerate (FPS)
 var draw = function() {
-	ctx.clearRect(0,0,400,200);
-	ctx.fillStyle = '#87F3FF';
-	ctx.fillRect(0,0,400,200);
+	ctx.clearRect(0,0,STAGE_WIDTH,STAGE_HEIGHT);
+	ctx.fillStyle = BACKGROUND_COLOR;
+	ctx.fillRect(0,0,STAGE_HEIGHT,STAGE_WIDTH);
 	// draw buildings
 	if (randomNumber(1,FPS*2) == 2) {
 		buildings.push(new Building());
@@ -121,7 +142,7 @@ var draw = function() {
 		2. the bottom of the bird is below the top of the building
 		3. the back of the bird is further right than the back of the building 
 		*/
-		if ((plane.x + plane.img.width > building.x) && (plane.y + plane.img.height > building.y) && (building.x + building.width > plane.x)) {
+		if ((plane.x + plane.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x)) {
 		}
 		// get rid of invisible buildings
 		if (building.x < building.width*(-1)) {
@@ -130,7 +151,10 @@ var draw = function() {
 	};
 
 	// draw plane
-	ctx.drawImage(plane.img, (plane.x += plane.xDirection), (plane.y += plane.yDirection));
+	ctx.fillStyle = plane.color;
+	//ctx.drawImage(plane.img, (plane.x += plane.xDirection), (plane.y += plane.yDirection));
+	ctx.fillRect((plane.x += plane.xDirection), (plane.y += plane.yDirection), plane.width, plane.height);
+
 
 	// draw missles
 	for (var i = 0; i < missles.length; i++) {
@@ -138,13 +162,15 @@ var draw = function() {
 		if(missle.stopped === false) {
 			missle.x *= 1.1;
 			}
-		ctx.drawImage(missle.img, missle.x ,missle.y);
+		ctx.fillStyle = 'white';
+		// ctx.drawImage(missle.img, missle.x ,missle.y);
+		ctx.fillRect(missle.x, missle.y, missle.width, missle.height);
 		for (var j = 0; j < buildings.length; j++) {
 			var building = buildings[j];
 				if (missle.x > 400 || missle.x < 1) {
 					destroy(missle, missles);
 				}
-			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.img.height > building.y) && (building.x + building.width > plane.x)) {
+			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x)) {
 				var index = missles.indexOf(missle);
 				destroy(missle, missles);
 				explode(building, missle);
