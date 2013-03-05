@@ -166,7 +166,8 @@ var draw = function() {
 				if (missle.x > STAGE_WIDTH || missle.x < 1) {
 					destroy(missle, missles);
 				}
-			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x)) {
+			// Still needs refined
+			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x) && (missle.y  < building.y + building.height)) {
 				var index = missles.indexOf(missle);
 				destroy(missle, missles);
 				explode(building, missle);
