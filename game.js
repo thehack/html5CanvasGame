@@ -22,7 +22,6 @@ var Building = Class.extend({
     this.hits = 0;
     this.color = boxColors[randomNumber(0,3)];
   }
-
 });
 
 var Missle = Class.extend({
@@ -137,13 +136,11 @@ var draw = function() {
 		ctx.fillStyle = building.color;
 		ctx.fillRect(building.x, building.y, building.width, building.height);
 		building.x -=SPEED;
-		/* collision detection: three conditions must evaluate true
-		1. the front of the plane is forward further than the back of the building
-		2. the bottom of the bird is below the top of the building
-		3. the back of the bird is further right than the back of the building 
-		*/
+		
+		// collision detection:
 		if ((plane.x + plane.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x)) {
 		}
+
 		// get rid of invisible buildings
 		if (building.x < building.width*(-1)) {
 			buildings.shift();
@@ -152,9 +149,7 @@ var draw = function() {
 
 	// draw plane
 	ctx.fillStyle = plane.color;
-	//ctx.drawImage(plane.img, (plane.x += plane.xDirection), (plane.y += plane.yDirection));
 	ctx.fillRect((plane.x += plane.xDirection), (plane.y += plane.yDirection), plane.width, plane.height);
-
 
 	// draw missles
 	for (var i = 0; i < missles.length; i++) {
@@ -163,11 +158,12 @@ var draw = function() {
 			missle.x *= 1.1;
 			}
 		ctx.fillStyle = 'white';
-		// ctx.drawImage(missle.img, missle.x ,missle.y);
 		ctx.fillRect(missle.x, missle.y, missle.width, missle.height);
 		for (var j = 0; j < buildings.length; j++) {
 			var building = buildings[j];
-				if (missle.x > 400 || missle.x < 1) {
+
+				// destroy off-screen missles
+				if (missle.x > STAGE_WIDTH || missle.x < 1) {
 					destroy(missle, missles);
 				}
 			if ((missle.x + missle.img.width > building.x) && (plane.y + plane.height > building.y) && (building.x + building.width > plane.x)) {
@@ -175,7 +171,6 @@ var draw = function() {
 				destroy(missle, missles);
 				explode(building, missle);
 			}
-
 		};
 	};
 
