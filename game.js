@@ -1,14 +1,28 @@
-// Plane oject. There is only one of these, so no need for psuedo-class.
+var STAGE_HEIGHT = 600;
+var STAGE_WIDTH = 600;
+
+var SPEED = 3; // rate at which plane normally moves past buildings.
+var FPS = 33;
+var BACKGROUND_COLOR = '#220035';
+
+var boxColors = ['rgb(215, 0, 127)', '#0096f9', '#f9d200', '#ff0000'];
+var buildings = [];
+var missles = [];
+var explosions = [];
+var body, canvas, div, ctx;
+var points = 0;
+
 var plane = {
-	x: 300,
-	y: 300,
+	x: STAGE_WIDTH/10,
+	y: (STAGE_HEIGHT - 20)/2,
 	speed: 5, 
 	xDirection: 0, 
 	yDirection: 0, 
 //	img: new Image(), 
 	width: 40, 
 	height: 20, 
-	color: '#1ed700'
+	color: '#1ed700',
+	firing: false
 };
 // plane.img.src = 'bird.png';
 
@@ -46,19 +60,7 @@ var Explosion = Class.extend({
 	}
 });
 
-// Constants
-var SPEED = 3; // rate at which plane normally moves past buildings.
-var FPS = 33;
-var BACKGROUND_COLOR = '#220035';
-var STAGE_HEIGHT = 600;
-var STAGE_WIDTH = 600;
-var boxColors = ['rgb(215, 0, 127)', '#0096f9', '#f9d200', '#ff0000'];
-var timeSinceLastBuilding = 0;
-var buildings = [];
-var missles = [];
-var explosions = [];
-var body, canvas, div, ctx;
-var points = 0;
+
 var setup = function() {
 	body = document.getElementById('body');
 	canvas = document.createElement('canvas');
@@ -74,37 +76,40 @@ var setup = function() {
 
 	// ARROW KEYS for controls; 
 	body.onkeydown = function(event) {
-		var kk = event.keyCode;
+		var kD = event.keyCode;
 
-		if (kk == 38) { // 'A' is pressed
+		if (kD == 38) { // 'A' is pressed
 			plane.yDirection = plane.speed*-1;
-		};
-		if (kk == 40) { // 'S'
+		}
+		if (kD == 40) { // 'S'
 			plane.yDirection = plane.speed;
-		};
-		if (kk == 37) { //'W' is pressed
+		}
+		if (kD == 37) { //'W' is pressed
 			plane.xDirection = plane.speed*-1;
-		};
-		if (kk == 39) { // 'D' is pressed
+		}
+		if (kD == 39) { // 'D' is pressed
 			plane.xDirection = plane.speed;
-		};
-		if (kk == 32) { // 'SPACEBAR' is pressed
-			missles.push(new Missle());
-		};
+		}
+		if (kD == 32) { // 'SPACEBAR' is pressed
+			plane.firing = true;
+		}
 	};
 	body.onkeyup = function(event) {
-		var ku = event.keyCode;
-		if (ku == 38) { // 'A' is pressed
+		var kU = event.keyCode;
+		if (kU == 38) { // 'A' is released
 			plane.yDirection += plane.speed;
 		}
-		if (ku == 40) { // 'S'
+		if (kU == 40) { // 'S' released
 			plane.yDirection -= plane.speed;
 		}
-		if (ku == 37) { //'W' is pressed
+		if (kU == 37) { //'W' is released
 			plane.xDirection += plane.speed;
 		}
-		if (ku == 39) { // 'D' is pressed
+		if (kU == 39) { // 'D' is released
 			plane.xDirection -= plane.speed;
+		}
+		if (kU == 32) { // 'SPACEBAR' is released
+			plane.firing = false;
 		}
 	};
 };
@@ -160,6 +165,10 @@ var draw = function() {
 	ctx.fillRect((plane.x += plane.xDirection), (plane.y += plane.yDirection), plane.width, plane.height);
 
 	// draw missles
+	if(plane.firing) {
+		missles.push(new Missle());
+	}
+
 	for (var i = 0; i < missles.length; i++) {
 		var missle = missles[i];
 		if(missle.stopped === false) {
