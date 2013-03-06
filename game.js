@@ -1,3 +1,7 @@
+var audio = document.createElement("audio");
+audio.src = 'pop.ogg';
+var hit = document.createElement("audio");
+hit.src = 'hit.ogg';
 var STAGE_HEIGHT = 600;
 var STAGE_WIDTH = 600;
 
@@ -35,6 +39,9 @@ var Building = Class.extend({
     this.y = roundTo(randomNumber(0, (STAGE_HEIGHT - this.height)), 10);
     this.hits = 0;
     this.color = boxColors[randomNumber(0,3)];
+  },
+  getAlpha: function() {
+  	return 1.0 - this.hits/10
   }
 });
 
@@ -121,7 +128,8 @@ var explode = function(building, missle) {
 	explosion.y = missle.y;
 	explosion.x = building.x;
 	building.hits += 1;
-	if(building.hits == 5) {
+	hit.play();
+	if(building.hits == 10) {
 		destroy(building, buildings);
 		points += Math.floor(1000/building.height);
 
@@ -134,11 +142,6 @@ var draw = function() {
 	ctx.clearRect(0,0,STAGE_WIDTH,STAGE_HEIGHT);
 	ctx.fillStyle = BACKGROUND_COLOR;
 	ctx.fillRect(0,0,STAGE_HEIGHT,STAGE_WIDTH);
-
-	// points 
-	ctx.fillStyle = 'white';
-	ctx.font = Math.floor(STAGE_HEIGHT/20) + 'px Arial';
-  	ctx.fillText((points + " points"), (STAGE_WIDTH - STAGE_WIDTH/4), STAGE_HEIGHT/10);
 	// draw buildings
 	if (randomNumber(1,FPS*2) == 2) {
 		buildings.push(new Building());
@@ -146,8 +149,10 @@ var draw = function() {
 
 	for (var i = 0; i < buildings.length; i++) {
 		var building = buildings[i];
+		ctx.globalAlpha = building.getAlpha();
 		ctx.fillStyle = building.color;
 		ctx.fillRect(building.x, building.y, building.width, building.height);
+		ctx.globalAlpha = 1.0;  // reset alpha
 		building.x -=SPEED;
 		
 		// collision detection:
@@ -167,6 +172,7 @@ var draw = function() {
 	// draw missles
 	if(plane.firing) {
 		missles.push(new Missle());
+		audio.play();
 	}
 
 	for (var i = 0; i < missles.length; i++) {
@@ -202,6 +208,11 @@ var draw = function() {
 			destroy(explosion, explosions);
 		} 
 	};
+
+	// points 
+	ctx.fillStyle = 'white';
+	ctx.font = Math.floor(STAGE_HEIGHT/20) + 'px Arial';
+  	ctx.fillText((points + " points"), (STAGE_WIDTH - STAGE_WIDTH/4), STAGE_HEIGHT/10);
 };
 
 var animate = function() {
