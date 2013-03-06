@@ -58,6 +58,7 @@ var buildings = [];
 var missles = [];
 var explosions = [];
 var body, canvas, div, ctx;
+var points = 0;
 var setup = function() {
 	body = document.getElementById('body');
 	canvas = document.createElement('canvas');
@@ -117,6 +118,8 @@ var explode = function(building, missle) {
 	building.hits += 1;
 	if(building.hits == 5) {
 		destroy(building, buildings);
+		points += Math.floor(1000/building.height);
+
 	}
 
 };
@@ -126,6 +129,11 @@ var draw = function() {
 	ctx.clearRect(0,0,STAGE_WIDTH,STAGE_HEIGHT);
 	ctx.fillStyle = BACKGROUND_COLOR;
 	ctx.fillRect(0,0,STAGE_HEIGHT,STAGE_WIDTH);
+
+	// points 
+	ctx.fillStyle = 'white';
+	ctx.font = Math.floor(STAGE_HEIGHT/20) + 'px Arial';
+  	ctx.fillText((points + " points"), (STAGE_WIDTH - STAGE_WIDTH/4), STAGE_HEIGHT/10);
 	// draw buildings
 	if (randomNumber(1,FPS*2) == 2) {
 		buildings.push(new Building());
@@ -190,6 +198,5 @@ var draw = function() {
 var animate = function() {
 	setInterval(function() {
 		draw();
-
 	}, (1000/FPS));
 };
