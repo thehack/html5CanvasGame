@@ -4,7 +4,7 @@ var hit = document.createElement("audio");
 hit.src = 'hit.ogg';
 var STAGE_HEIGHT = 600;
 var STAGE_WIDTH = 600;
-
+var frame = 0;
 var SPEED = 3; // rate at which plane normally moves past buildings.
 var FPS = 33;
 var BACKGROUND_COLOR = '#220035';
@@ -22,13 +22,11 @@ var plane = {
 	speed: 5, 
 	xDirection: 0, 
 	yDirection: 0, 
-//	img: new Image(), 
 	width: 40, 
 	height: 20, 
 	color: '#1ed700',
 	firing: false
-};
-// plane.img.src = 'bird.png';
+}
 
 // Classes for Game Objects.
 var Building = Class.extend({
@@ -66,7 +64,6 @@ var Explosion = Class.extend({
 		this.frame = 20;
 	}
 });
-
 
 var setup = function() {
 	body = document.getElementById('body');
@@ -129,12 +126,18 @@ var explode = function(building, missle) {
 	explosion.x = building.x;
 	building.hits += 1;
 	hit.play();
-	if(building.hits == 10) {
+	if(building.hits == 6) {
 		destroy(building, buildings);
 		points += Math.floor(1000/building.height);
 
 	}
 
+};
+var incrementFrame = function() {
+	if(frame > FPS) {
+	return frame = 0;
+	}
+	return frame ++;
 };
 
 // Everything on the canvas gets redrawn at the framerate (FPS)
@@ -170,9 +173,9 @@ var draw = function() {
 	ctx.fillRect((plane.x += plane.xDirection), (plane.y += plane.yDirection), plane.width, plane.height);
 
 	// draw missles
-	if(plane.firing) {
-		missles.push(new Missle());
-		audio.play();
+	if(plane.firing && (frame % 6 == 0)) {
+			missles.push(new Missle());
+			audio.play(); 
 	}
 
 	for (var i = 0; i < missles.length; i++) {
@@ -212,7 +215,8 @@ var draw = function() {
 	// points 
 	ctx.fillStyle = 'white';
 	ctx.font = Math.floor(STAGE_HEIGHT/20) + 'px Arial';
-  	ctx.fillText((points + " points"), (STAGE_WIDTH - STAGE_WIDTH/4), STAGE_HEIGHT/10);
+  ctx.fillText((points + " points"), (STAGE_WIDTH - STAGE_WIDTH/4), STAGE_HEIGHT/10);
+	incrementFrame();
 };
 
 var animate = function() {

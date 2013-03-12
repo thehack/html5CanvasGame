@@ -75,4 +75,4 @@ var roundTo = function(val, place) {
 var destroy = function(item, array) {
   var index = array.indexOf(item);
   array.splice(index, 1);
-}
+};
