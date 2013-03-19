@@ -2,13 +2,16 @@ var audio = document.createElement("audio");
 audio.src = 'pop.ogg';
 var hit = document.createElement("audio");
 hit.src = 'hit.ogg';
-var STAGE_HEIGHT = 600;
-var STAGE_WIDTH = 600;
+var crack = new Image();
+crack.src = 'crack.png';
+var STAGE_HEIGHT = 400;
+var STAGE_WIDTH = 940;
 var frame = 0;
-var SPEED = 3; // rate at which plane normally moves past buildings.
+var SPEED = 6; // rate at which plane normally moves past buildings.
 var FPS = 33;
 var BACKGROUND_COLOR = '#220035';
-
+var verseString = "For God so loved the world that He gave His one and only Son that whoever believes in Him will not perish but have eternal life";
+var verse = verseString.split(" ");
 var boxColors = ['rgb(215, 0, 127)', '#0096f9', '#f9d200', '#ff0000'];
 var buildings = [];
 var missles = [];
@@ -19,7 +22,7 @@ var points = 0;
 var plane = {
 	x: STAGE_WIDTH/10,
 	y: (STAGE_HEIGHT - 20)/2,
-	speed: 5, 
+	speed: 7, 
 	xDirection: 0, 
 	yDirection: 0, 
 	width: 40, 
@@ -32,11 +35,14 @@ var plane = {
 var Building = Class.extend({
   init: function(){
     this.x = STAGE_WIDTH;
-    this.height = roundTo(randomNumber(10, 160), 10);
+    this.height = 100;
+    //this.height = roundTo(randomNumber(10, 160), 10);
     this.width = this.height;
     this.y = roundTo(randomNumber(0, (STAGE_HEIGHT - this.height)), 10);
     this.hits = 0;
     this.color = boxColors[randomNumber(0,3)];
+    this.word = verse.shift() || "";
+
   },
   getAlpha: function() {
   	return 1.0 - this.hits/10
@@ -82,16 +88,16 @@ var setup = function() {
 	body.onkeydown = function(event) {
 		var kD = event.keyCode;
 
-		if (kD == 38) { // 'A' is pressed
+		if (kD == 38) { // 'UP' is pressed
 			plane.yDirection = plane.speed*-1;
 		}
-		if (kD == 40) { // 'S'
+		if (kD == 40) { // 'DOWN'
 			plane.yDirection = plane.speed;
 		}
-		if (kD == 37) { //'W' is pressed
+		if (kD == 37) { //'RIGHT' is pressed
 			plane.xDirection = plane.speed*-1;
 		}
-		if (kD == 39) { // 'D' is pressed
+		if (kD == 39) { // 'LEFT' is pressed
 			plane.xDirection = plane.speed;
 		}
 		if (kD == 32) { // 'SPACEBAR' is pressed
@@ -144,17 +150,27 @@ var incrementFrame = function() {
 var draw = function() {
 	ctx.clearRect(0,0,STAGE_WIDTH,STAGE_HEIGHT);
 	ctx.fillStyle = BACKGROUND_COLOR;
-	ctx.fillRect(0,0,STAGE_HEIGHT,STAGE_WIDTH);
+	ctx.fillRect(0,0, STAGE_WIDTH, STAGE_HEIGHT);
 	// draw buildings
+
 	if (randomNumber(1,FPS*2) == 2) {
 		buildings.push(new Building());
 	}
-
 	for (var i = 0; i < buildings.length; i++) {
 		var building = buildings[i];
-		ctx.globalAlpha = building.getAlpha();
+//		ctx.globalAlpha = building.getAlpha();
 		ctx.fillStyle = building.color;
 		ctx.fillRect(building.x, building.y, building.width, building.height);
+		ctx.globalAlpha = 1.0;  // reset alpha
+
+		// draw cracks
+		// context.drawImage(imageObj, sx, sy, sw, sh, dx, dy, dw, dh);
+		if (building.hits > 0) {
+			ctx.drawImage(crack, (building.hits*200 -200), 0, 200, 200, building.x, building.y, building.width, building.height);
+		}
+
+		ctx.fillText(building.word, building.x, building.y +20 );
+
 		ctx.globalAlpha = 1.0;  // reset alpha
 		building.x -=SPEED;
 		
